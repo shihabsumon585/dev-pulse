@@ -7,7 +7,6 @@ import { userService } from "./user.service"
 const createUser = async(req: Request, res: Response) => {
     try {
         const result = await userService.createUserIntoDB(req.body);
-        console.log(result)
 
         res.status(200).json({
             success: true,
@@ -22,7 +21,16 @@ const createUser = async(req: Request, res: Response) => {
     }
 }
 
+const userLogin = async (req: Request, res: Response) => {
+    try {
+        const result = await userService.userLoginResponceIntoDB(req.body);
+    } catch (error) {
+        
+    }
+}
+
 
 export const userController = {
-    createUser
+    createUser,
+    userLogin
 }
