@@ -1,6 +1,9 @@
 import { pool } from "../../db";
 import bcrypt from "bcrypt";
 import type { ILogin, IUser } from "./user.interface";
+import jwt from "jsonwebtoken";
+import config from "../../config/index";
+
 
 
 const createUserIntoDB = async (payload: IUser) => {
@@ -23,12 +26,38 @@ const createUserIntoDB = async (payload: IUser) => {
 
 const userLoginResponceIntoDB = async (payload: ILogin) => {
     const {email, password} = payload;
-    
+    password as string;
+
     const result = await pool.query(`
             SELECT * FROM users WHERE email=$1
         `, [email])
+        
+        const user = result.rows[0];
 
-        console.log(result.rows[0]);
+        if (!user || user === undefined || user === null) {
+            throw new Error("User not found");
+        }
+
+        const isPasswordMatch = await bcrypt.compare(password.toString(), user.password);
+        
+        if (!isPasswordMatch) {
+            throw new Error("Invalid password");
+        }
+
+        const tokenPayload = {
+            id: user.id,
+            name: user.name,
+            role: user.role
+        }
+
+        const token = await jwt.sign(tokenPayload, config.secret_key as string, { expiresIn: "1d" });
+
+
+        // console.log("User found: ",result.rows[0]);
+
+        delete result.rows[0].password;
+
+        return {token, user: result.rows[0]};
 }
 
 export const userService = {
