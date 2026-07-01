@@ -50,14 +50,9 @@ const userLoginResponceIntoDB = async (payload: ILogin) => {
             role: user.role
         }
 
-        const token = await jwt.sign(tokenPayload, config.secret_key as string, { expiresIn: "1d" });
-
-
-        // console.log("User found: ",result.rows[0]);
-
         delete result.rows[0].password;
 
-        return {token, user: result.rows[0]};
+        return result.rows[0];
 }
 
 export const userService = {
